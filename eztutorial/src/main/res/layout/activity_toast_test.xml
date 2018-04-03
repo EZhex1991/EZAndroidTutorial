@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/toast_general"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/general_toast"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/toast_coordinated_general"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/general_toast_with_coordinates"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/toast_custom_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/custom_view_toast"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/toast_custom_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/custom_layout_toast"
+            android:textAllCaps="false" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/button_quit_toast_test"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:text="@string/quit" />
+
+
+</android.support.design.widget.CoordinatorLayout>

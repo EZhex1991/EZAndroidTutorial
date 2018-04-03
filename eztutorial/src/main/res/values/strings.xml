@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">EZTutorial</string>
+
+    <string name="test">Test</string>
+    <string name="quit">Quit</string>
+    <string name="input">Input</string>
+
+    <string name="resolution">Resolution: %1$d * %2$d</string>
+    <string name="button_get_resolution">Get Resolution</string>
+
+    <string name="toast">Toast</string>
+    <string name="general_toast">General Toast</string>
+    <string name="general_toast_with_coordinates">General Toast With Coordinates</string>
+    <string name="custom_view_toast">Custom View Toast</string>
+    <string name="custom_layout_toast">Custom Layout Toast</string>
+
+    <string name="checkbox_selections">CheckBox Selections: </string>
+    <string name="checkbox_1">CheckBox 1</string>
+    <string name="checkbox_2">CheckBox 2</string>
+
+    <string name="radio_selection">Radio Selection: </string>
+    <string name="radio_1">Radio 1</string>
+    <string name="radio_2">Radio 2</string>
+
+    <string name="submit">Submit</string>
+</resources>
