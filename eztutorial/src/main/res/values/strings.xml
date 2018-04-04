@@ -22,5 +22,9 @@
     <string name="radio_1">Radio 1</string>
     <string name="radio_2">Radio 2</string>
 
+    <string name="floating_window">Floating Window</string>
+    <string name="floating_window_enabled">Floating Window Enabled</string>
+    <string name="floating_window_disabled">Floating Window Disabled</string>
+
     <string name="submit">Submit</string>
 </resources>

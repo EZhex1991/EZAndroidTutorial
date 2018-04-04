@@ -1,7 +1,10 @@
 package com.ezhex1991.tutorial;
 
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.Menu;
@@ -14,8 +17,13 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 public class MainActivity extends AppCompatActivity {
+    public static final int OVERLAY_PERMISSION_REQUEST_CODE = 100;
+
+    private static Intent floatingWindowService;
+
     private TextView testText;
     private Button testButton;
 
@@ -28,7 +36,18 @@ public class MainActivity extends AppCompatActivity {
     private TextView text_RadioSelection;
     private RadioButton[] radioButtonList;
 
+    private boolean floatingWindowEnabled = true;
+    private ToggleButton toggle_FloatingWindow;
+
     private Button button_Submit;
+
+    private boolean checkPermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return true;
+        } else {
+            return Settings.canDrawOverlays(getApplicationContext());
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -93,6 +112,23 @@ public class MainActivity extends AppCompatActivity {
             rb.setOnClickListener(radiobuttonListener);
         }
 
+        floatingWindowService = new Intent(this, FloatingWindowService.class);
+        toggle_FloatingWindow = findViewById(R.id.toggle_floating_window);
+        toggle_FloatingWindow.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (!checkPermission()) {
+                    floatingWindowEnabled = false;
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+                    startActivityForResult(intent, OVERLAY_PERMISSION_REQUEST_CODE);
+                } else {
+                    floatingWindowEnabled = isChecked;
+                }
+                if (floatingWindowEnabled) startService(floatingWindowService);
+                else stopService(floatingWindowService);
+            }
+        });
+
         button_Submit = findViewById(R.id.button_submit);
         button_Submit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -107,6 +143,31 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (floatingWindowEnabled) {
+            startService(floatingWindowService);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (floatingWindowEnabled) {
+            startService(floatingWindowService);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (!checkPermission()) {
+            Toast.makeText(this, "ACTION_MANAGE_OVERLAY_PERMISSION is necessary for floating window service", Toast.LENGTH_SHORT).show();
+            toggle_FloatingWindow.setChecked(false);
+        }
     }
 
     @Override

@@ -10,13 +10,19 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ToastTestActivity"></activity>
-        <activity android:name=".BundleTestActivity"></activity>
+        <activity android:name=".ToastTestActivity" />
+        <activity android:name=".BundleTestActivity" />
+
+        <service android:name=".FloatingWindowService" />
     </application>
+
+    <!--required by floating window-->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 </manifest>
