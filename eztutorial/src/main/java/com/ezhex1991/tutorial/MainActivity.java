@@ -1,6 +1,7 @@
 package com.ezhex1991.tutorial;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,8 +22,12 @@ import android.widget.ToggleButton;
 
 public class MainActivity extends AppCompatActivity {
     public static final int OVERLAY_PERMISSION_REQUEST_CODE = 100;
+    private static final String PREFERENCE_KEY_FLOATING_WINDOW = "floating_window_enabled";
 
     private static Intent floatingWindowService;
+
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor preferenceEditor;
 
     private TextView testText;
     private Button testButton;
@@ -53,6 +58,10 @@ public class MainActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        sharedPreferences = this.getSharedPreferences("prefer", MODE_PRIVATE);
+        preferenceEditor = sharedPreferences.edit();
+
         testText = findViewById(R.id.text_test);
         testButton = findViewById(R.id.button_test);
         testButton.setOnClickListener(new Button.OnClickListener() {
@@ -114,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
 
         floatingWindowService = new Intent(this, FloatingWindowService.class);
         toggle_FloatingWindow = findViewById(R.id.toggle_floating_window);
+        toggle_FloatingWindow.setChecked(sharedPreferences.getBoolean(PREFERENCE_KEY_FLOATING_WINDOW, floatingWindowEnabled));
         toggle_FloatingWindow.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -124,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     floatingWindowEnabled = isChecked;
                 }
+                preferenceEditor.putBoolean(PREFERENCE_KEY_FLOATING_WINDOW, floatingWindowEnabled);
                 if (floatingWindowEnabled) startService(floatingWindowService);
                 else stopService(floatingWindowService);
             }
@@ -164,9 +175,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (!checkPermission()) {
-            Toast.makeText(this, "ACTION_MANAGE_OVERLAY_PERMISSION is necessary for floating window service", Toast.LENGTH_SHORT).show();
-            toggle_FloatingWindow.setChecked(false);
+        if (requestCode == OVERLAY_PERMISSION_REQUEST_CODE) {
+            if (!checkPermission()) {
+                Toast.makeText(this, "ACTION_MANAGE_OVERLAY_PERMISSION is necessary for floating window service", Toast.LENGTH_SHORT).show();
+                toggle_FloatingWindow.setChecked(false);
+            } else {
+                startService(floatingWindowService);
+            }
         }
     }
 
