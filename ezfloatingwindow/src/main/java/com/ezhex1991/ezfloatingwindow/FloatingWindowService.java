@@ -155,11 +155,11 @@ public class FloatingWindowService extends Service {
         return floatingWindowService;
     }
 
-    public static void startService(Activity activity, String text) {
-        activity.startService(getServiceIntent(activity, text));
+    public static void startService(Activity activity, Intent intent) {
+        activity.startService(intent);
     }
 
-    public static void stopService(Activity activity) {
-        activity.stopService(getServiceIntent(activity, ""));
+    public static void stopService(Activity activity, Intent intent) {
+        activity.stopService(intent);
     }
 }
