@@ -81,7 +81,6 @@ public class FloatingWindowService extends Service {
                     case MotionEvent.ACTION_MOVE:
                         deltaX = eventX - currentX;
                         deltaY = eventY - currentY;
-                        Log.d(TAG, String.format("onTouch: %1d, %2d", deltaX, deltaY));
                         if (Math.abs(currentX - startX) > moveThreshold || Math.abs(currentY - startY) > moveThreshold) {
                             m_FloatingWindowParams.x += deltaX;
                             m_FloatingWindowParams.y += deltaY;
