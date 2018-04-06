@@ -23,7 +23,6 @@ import android.widget.ToggleButton;
 import com.ezhex1991.ezfloatingwindow.FloatingWindowService;
 
 public class MainActivity extends AppCompatActivity {
-    public static final int OVERLAY_PERMISSION_REQUEST_CODE = 100;
     private static final String PREFERENCE_KEY_FLOATING_WINDOW = "floating_window_enabled";
 
     private static Intent floatingWindowService;
@@ -47,14 +46,6 @@ public class MainActivity extends AppCompatActivity {
     private ToggleButton toggle_FloatingWindow;
 
     private Button button_Submit;
-
-    private boolean checkPermission() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        } else {
-            return Settings.canDrawOverlays(getApplicationContext());
-        }
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -128,10 +119,9 @@ public class MainActivity extends AppCompatActivity {
         toggle_FloatingWindow.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (!checkPermission()) {
+                if (!FloatingWindowService.checkPermission(MainActivity.this)) {
                     floatingWindowEnabled = false;
-                    Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
-                    startActivityForResult(intent, OVERLAY_PERMISSION_REQUEST_CODE);
+                    FloatingWindowService.getPermission(MainActivity.this);
                 } else {
                     floatingWindowEnabled = isChecked;
                 }
@@ -177,8 +167,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == OVERLAY_PERMISSION_REQUEST_CODE) {
-            if (!checkPermission()) {
+        if (requestCode == FloatingWindowService.OVERLAY_PERMISSION_REQUEST_CODE) {
+            if (!FloatingWindowService.checkPermission(this)) {
                 Toast.makeText(this, "ACTION_MANAGE_OVERLAY_PERMISSION is necessary for floating window service", Toast.LENGTH_SHORT).show();
                 toggle_FloatingWindow.setChecked(false);
             } else {

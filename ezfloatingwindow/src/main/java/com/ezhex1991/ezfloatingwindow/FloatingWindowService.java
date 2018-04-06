@@ -5,8 +5,10 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -17,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 public class FloatingWindowService extends Service {
+    public static final int OVERLAY_PERMISSION_REQUEST_CODE = 100;
     private static final String TAG = "FloatingWindowService";
 
     private WindowManager m_WindowManager;
@@ -92,7 +95,7 @@ public class FloatingWindowService extends Service {
                         if (!isMoved) {
                             if (m_ActivityIntent != null) {
                                 startActivity(m_ActivityIntent);
-                                Toast.makeText(FloatingWindowService.this, "Jump to EZTutorial", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(FloatingWindowService.this, "Jump to " + m_ActivityIntent.getComponent().getClassName(), Toast.LENGTH_SHORT).show();
                             }
                             v.performClick();
                         }
@@ -131,10 +134,32 @@ public class FloatingWindowService extends Service {
         super.onDestroy();
     }
 
+
+    public static boolean checkPermission(Activity activity) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return true;
+        } else {
+            return Settings.canDrawOverlays(activity.getApplicationContext());
+        }
+    }
+
+    public static void getPermission(Activity activity) {
+        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + activity.getPackageName()));
+        activity.startActivityForResult(intent, OVERLAY_PERMISSION_REQUEST_CODE);
+    }
+
     public static Intent getServiceIntent(Activity activity, String text) {
         Intent floatingWindowService = new Intent(activity, FloatingWindowService.class);
         floatingWindowService.putExtra("text", text);
         floatingWindowService.putExtra("className", activity.getClass().getName());
         return floatingWindowService;
+    }
+
+    public static void startService(Activity activity, String text) {
+        activity.startService(getServiceIntent(activity, text));
+    }
+
+    public static void stopService(Activity activity) {
+        activity.stopService(getServiceIntent(activity, ""));
     }
 }
