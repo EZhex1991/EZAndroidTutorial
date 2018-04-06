@@ -1,1 +1,1 @@
-include ':ezlauncher', ':eztutorial', ':ezfloatingwindow'
+include ':ezlauncher', ':eztutorial', ':ezfloatingwindow', ':ezstreamingloader'
