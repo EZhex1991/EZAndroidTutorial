@@ -20,6 +20,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.ezhex1991.ezfloatingwindow.FloatingWindowService;
+
 public class MainActivity extends AppCompatActivity {
     public static final int OVERLAY_PERMISSION_REQUEST_CODE = 100;
     private static final String PREFERENCE_KEY_FLOATING_WINDOW = "floating_window_enabled";
@@ -121,9 +123,8 @@ public class MainActivity extends AppCompatActivity {
             rb.setOnClickListener(radiobuttonListener);
         }
 
-        floatingWindowService = new Intent(this, FloatingWindowService.class);
+        floatingWindowService = FloatingWindowService.getServiceIntent(this, this.getClass().getName());
         toggle_FloatingWindow = findViewById(R.id.toggle_floating_window);
-        toggle_FloatingWindow.setChecked(sharedPreferences.getBoolean(PREFERENCE_KEY_FLOATING_WINDOW, floatingWindowEnabled));
         toggle_FloatingWindow.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -134,11 +135,12 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     floatingWindowEnabled = isChecked;
                 }
-                preferenceEditor.putBoolean(PREFERENCE_KEY_FLOATING_WINDOW, floatingWindowEnabled);
+                preferenceEditor.putBoolean(PREFERENCE_KEY_FLOATING_WINDOW, floatingWindowEnabled).apply();
                 if (floatingWindowEnabled) startService(floatingWindowService);
                 else stopService(floatingWindowService);
             }
         });
+        toggle_FloatingWindow.setChecked(sharedPreferences.getBoolean(PREFERENCE_KEY_FLOATING_WINDOW, floatingWindowEnabled));
 
         button_Submit = findViewById(R.id.button_submit);
         button_Submit.setOnClickListener(new View.OnClickListener() {

@@ -1,5 +1,6 @@
-package com.ezhex1991.tutorial;
+package com.ezhex1991.ezfloatingwindow;
 
+import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -21,6 +22,9 @@ public class FloatingWindowService extends Service {
     private WindowManager m_WindowManager;
     private LinearLayout m_FloatingWindow;
     private WindowManager.LayoutParams m_FloatingWindowParams;
+
+    private Button m_Button;
+    private Intent m_ActivityIntent;
 
     private int startX = 0, startY = 500;
 
@@ -52,7 +56,7 @@ public class FloatingWindowService extends Service {
         // add view
         m_WindowManager.addView(m_FloatingWindow, m_FloatingWindowParams);
         // get added view
-        Button button = m_FloatingWindow.findViewById(R.id.floating_window_button);
+        m_Button = m_FloatingWindow.findViewById(R.id.button);
         View.OnTouchListener buttonListener = new View.OnTouchListener() {
             private int currentX, currentY;
             private int eventX, eventY;
@@ -86,10 +90,10 @@ public class FloatingWindowService extends Service {
                         break;
                     case MotionEvent.ACTION_UP:
                         if (!isMoved) {
-                            Intent intent = new Intent(FloatingWindowService.this, MainActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-                            startActivity(intent);
-                            Toast.makeText(FloatingWindowService.this, "Jump to EZTutorial", Toast.LENGTH_SHORT).show();
+                            if (m_ActivityIntent != null) {
+                                startActivity(m_ActivityIntent);
+                                Toast.makeText(FloatingWindowService.this, "Jump to EZTutorial", Toast.LENGTH_SHORT).show();
+                            }
                             v.performClick();
                         }
                         break;
@@ -97,7 +101,22 @@ public class FloatingWindowService extends Service {
                 return false;
             }
         };
-        button.setOnTouchListener(buttonListener);
+        m_Button.setOnTouchListener(buttonListener);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        m_Button.setText(intent.getExtras().getString("text"));
+        String className = intent.getExtras().getString("className");
+        Log.d(TAG, "onStartCommand: " + className);
+        try {
+            m_ActivityIntent = new Intent(this, Class.forName(className));
+            m_ActivityIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+        } catch (ClassNotFoundException e) {
+            m_ActivityIntent = null;
+            Log.e(TAG, "onStartCommand: class name from intent extra is invalid");
+        }
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
@@ -110,5 +129,12 @@ public class FloatingWindowService extends Service {
         if (m_FloatingWindow != null)
             m_WindowManager.removeView(m_FloatingWindow);
         super.onDestroy();
+    }
+
+    public static Intent getServiceIntent(Activity activity, String text) {
+        Intent floatingWindowService = new Intent(activity, FloatingWindowService.class);
+        floatingWindowService.putExtra("text", text);
+        floatingWindowService.putExtra("className", activity.getClass().getName());
+        return floatingWindowService;
     }
 }

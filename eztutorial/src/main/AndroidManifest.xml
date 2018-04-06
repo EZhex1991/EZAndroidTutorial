@@ -20,7 +20,6 @@
         <activity android:name=".ToastTestActivity" />
         <activity android:name=".BundleTestActivity" />
 
-        <service android:name=".FloatingWindowService" />
     </application>
 
     <!--required by floating window-->
