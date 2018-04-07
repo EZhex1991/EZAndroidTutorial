@@ -1,11 +1,11 @@
-package com.ezhex1991.launcher;
+package com.ezhex1991.ezlauncher;
 
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Layout;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String TAG = "Launcher";
+    private static final String TAG = "MainActivity";
 
     private GridView appListView;
     private List<ResolveInfo> resolveInfoList;
@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
 //        appListView.setAdapter(new SimpleAdapter(
 //                this,
 //                appInfoList,
-//                R.layout.app_item,
+//                R.layout.app_info,
 //                new String[]{"Icon", "Name"},
 //                new int[]{R.id.app_icon, R.id.app_name}));
         appListView.setAdapter(new AppListAdapter());
@@ -76,13 +76,24 @@ public class MainActivity extends AppCompatActivity {
         private ViewGroup.LayoutParams itemViewParams;
         private ViewGroup.LayoutParams iconViewParams;
         private ViewGroup.LayoutParams nameViewParams;
+        private int columnCount = 4;
+        private float fillRatio = 0.8f;
 
         public AppListAdapter() {
             LayoutInflater inflater = LayoutInflater.from(getApplication());
-            itemLayout = (LinearLayout) inflater.inflate(R.layout.app_item, appListView, false);
+            itemLayout = (LinearLayout) inflater.inflate(R.layout.app_info, appListView, false);
             itemViewParams = itemLayout.getLayoutParams();
             iconViewParams = itemLayout.findViewById(R.id.app_icon).getLayoutParams();
             nameViewParams = itemLayout.findViewById(R.id.app_name).getLayoutParams();
+
+            DisplayMetrics dm = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(dm);
+            int width = dm.widthPixels / columnCount;
+            itemViewParams.width = width;
+            itemViewParams.height = (int) (width * 1.5);
+            iconViewParams.width = iconViewParams.height = (int) (width * fillRatio);
+            nameViewParams.width = width;
+            nameViewParams.height = (int) (width * 0.5);
         }
 
         public View getView(int position, View view, ViewGroup parent) {

@@ -1,4 +1,4 @@
-package com.ezhex1991.launcher;
+package com.ezhex1991.ezlauncher;
 
 import org.junit.Test;
 

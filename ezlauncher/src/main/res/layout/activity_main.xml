@@ -11,16 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:layout_margin="10dp"
-        android:horizontalSpacing="10dp"
-        android:numColumns="4"
-        android:scrollbars="none"
-        android:verticalSpacing="10dp" />
-
-    <ImageView
-        android:id="@+id/app_item"
-        android:layout_width="72dp"
-        android:layout_height="72dp"
-        android:layout_gravity="center" />
+        android:numColumns="4" />
 
 </android.support.design.widget.CoordinatorLayout>
