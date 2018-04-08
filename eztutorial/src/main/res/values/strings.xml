@@ -26,5 +26,8 @@
     <string name="floating_window_enabled">Floating Window Enabled</string>
     <string name="floating_window_disabled">Floating Window Disabled</string>
 
+    <string name="background">Background</string>
+    <string name="foreground">Foreground</string>
+
     <string name="submit">Submit</string>
 </resources>

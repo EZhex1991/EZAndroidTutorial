@@ -1,14 +1,15 @@
 package com.ezhex1991.ezfloatingwindow;
 
-import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
-import android.net.Uri;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.IBinder;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -19,17 +20,22 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 public class FloatingWindowService extends Service {
-    public static final int OVERLAY_PERMISSION_REQUEST_CODE = 100;
     private static final String TAG = "FloatingWindowService";
 
     private WindowManager m_WindowManager;
-    private LinearLayout m_FloatingWindow;
     private WindowManager.LayoutParams m_FloatingWindowParams;
-
-    private Button m_Button;
     private Intent m_ActivityIntent;
 
+    private static LinearLayout m_FloatingWindow;
+    private static Button button;
+
     private int startX = 0, startY = 500;
+
+    public class Binder extends android.os.Binder {
+        public FloatingWindowService getService() {
+            return FloatingWindowService.this;
+        }
+    }
 
     @Override
     public void onCreate() {
@@ -44,8 +50,11 @@ public class FloatingWindowService extends Service {
         } else {
             m_FloatingWindowParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY; // TYPE_PHONE is deprecated
         }
-        m_FloatingWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE; // can not focus to this window
-        m_FloatingWindowParams.format = PixelFormat.RGBA_8888; // set background to transparent
+        // do not block touch event
+        m_FloatingWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        m_FloatingWindowParams.format = PixelFormat.TRANSLUCENT; // set background to transparent
         // set window size to content size
         m_FloatingWindowParams.width = m_FloatingWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
         // set start position
@@ -58,8 +67,8 @@ public class FloatingWindowService extends Service {
 
         // add view
         m_WindowManager.addView(m_FloatingWindow, m_FloatingWindowParams);
-        // get added view
-        m_Button = m_FloatingWindow.findViewById(R.id.button);
+
+        button = m_FloatingWindow.findViewById(R.id.button);
         View.OnTouchListener buttonListener = new View.OnTouchListener() {
             private int currentX, currentY;
             private int eventX, eventY;
@@ -95,6 +104,8 @@ public class FloatingWindowService extends Service {
                             if (m_ActivityIntent != null) {
                                 startActivity(m_ActivityIntent);
                                 Toast.makeText(FloatingWindowService.this, "Jump to " + m_ActivityIntent.getComponent().getClassName(), Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(FloatingWindowService.this, "Null", Toast.LENGTH_SHORT).show();
                             }
                             v.performClick();
                         }
@@ -103,27 +114,19 @@ public class FloatingWindowService extends Service {
                 return false;
             }
         };
-        m_Button.setOnTouchListener(buttonListener);
+        button.setOnTouchListener(buttonListener);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        m_Button.setText(intent.getExtras().getString("text"));
-        String className = intent.getExtras().getString("className");
-        Log.d(TAG, "onStartCommand: " + className);
-        try {
-            m_ActivityIntent = new Intent(this, Class.forName(className));
-            m_ActivityIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-        } catch (ClassNotFoundException e) {
-            m_ActivityIntent = null;
-            Log.e(TAG, "onStartCommand: class name from intent extra is invalid");
-        }
+        getIntentData(intent);
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        getIntentData(intent);
+        return new Binder();
     }
 
     @Override
@@ -133,32 +136,43 @@ public class FloatingWindowService extends Service {
         super.onDestroy();
     }
 
-
-    public static boolean checkPermission(Activity activity) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
+    public boolean getIntentData(Intent intent) {
+        if (intent == null || intent.getExtras() == null) {
+            this.stopSelf();
+            return false;
         } else {
-            return Settings.canDrawOverlays(activity.getApplicationContext());
+            String className = intent.getExtras().getString("className");
+
+            String text = intent.getExtras().getString("text");
+            if (text != null && !text.isEmpty()) {
+                setText(text);
+            }
+
+            byte[] imageBytes = intent.getExtras().getByteArray("imageBytes");
+            if (imageBytes != null && imageBytes.length > 0) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                Drawable drawable = new BitmapDrawable(getResources(), bitmap);
+                setBackground(drawable);
+            }
+
+            try {
+                m_ActivityIntent = new Intent(this, Class.forName(className));
+                m_ActivityIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+            } catch (ClassNotFoundException e) {
+                m_ActivityIntent = null;
+                Log.e(TAG, "Class name from intent extra is invalid");
+            }
+            return true;
         }
     }
 
-    public static void getPermission(Activity activity) {
-        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + activity.getPackageName()));
-        activity.startActivityForResult(intent, OVERLAY_PERMISSION_REQUEST_CODE);
+    public static void setText(String text) {
+        if (button != null)
+            button.setText(text);
     }
 
-    public static Intent getServiceIntent(Activity activity, String text) {
-        Intent floatingWindowService = new Intent(activity, FloatingWindowService.class);
-        floatingWindowService.putExtra("text", text);
-        floatingWindowService.putExtra("className", activity.getClass().getName());
-        return floatingWindowService;
-    }
-
-    public static void startService(Activity activity, Intent intent) {
-        activity.startService(intent);
-    }
-
-    public static void stopService(Activity activity, Intent intent) {
-        activity.stopService(intent);
+    public static void setBackground(Drawable background) {
+        if (button != null)
+            button.setBackground(background);
     }
 }

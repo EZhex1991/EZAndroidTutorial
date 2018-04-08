@@ -2,10 +2,8 @@ package com.ezhex1991.tutorial;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.Menu;
@@ -15,17 +13,17 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.ezhex1991.ezfloatingwindow.FloatingWindow;
 import com.ezhex1991.ezfloatingwindow.FloatingWindowService;
 
 public class MainActivity extends AppCompatActivity {
     private static final String PREFERENCE_KEY_FLOATING_WINDOW = "floating_window_enabled";
 
-    private static Intent floatingWindowService;
+    private FloatingWindow floatingWindow;
 
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor preferenceEditor;
@@ -44,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean floatingWindowEnabled = true;
     private ToggleButton toggle_FloatingWindow;
+
+    private Button button_SetForeground;
+    private Button button_SetBackground;
 
     private Button button_Submit;
 
@@ -114,23 +115,41 @@ public class MainActivity extends AppCompatActivity {
             rb.setOnClickListener(radiobuttonListener);
         }
 
-        floatingWindowService = FloatingWindowService.getServiceIntent(this, this.getClass().getName());
+        floatingWindow = new FloatingWindow(this);
         toggle_FloatingWindow = findViewById(R.id.toggle_floating_window);
         toggle_FloatingWindow.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (!FloatingWindowService.checkPermission(MainActivity.this)) {
+                if (!floatingWindow.checkPermission()) {
                     floatingWindowEnabled = false;
-                    FloatingWindowService.getPermission(MainActivity.this);
+                    floatingWindow.getPermission();
                 } else {
                     floatingWindowEnabled = isChecked;
                 }
                 preferenceEditor.putBoolean(PREFERENCE_KEY_FLOATING_WINDOW, floatingWindowEnabled).apply();
-                if (floatingWindowEnabled) startService(floatingWindowService);
-                else stopService(floatingWindowService);
+                if (floatingWindowEnabled) {
+                    floatingWindow.startService();
+                } else {
+                    floatingWindow.stopService();
+                }
             }
         });
         toggle_FloatingWindow.setChecked(sharedPreferences.getBoolean(PREFERENCE_KEY_FLOATING_WINDOW, floatingWindowEnabled));
+
+        button_SetForeground = findViewById(R.id.button_set_floating_window_foreground);
+        button_SetForeground.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                floatingWindow.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_launcher_foreground, null));
+            }
+        });
+        button_SetBackground = findViewById(R.id.button_set_floating_window_background);
+        button_SetBackground.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                floatingWindow.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_launcher_background, null));
+            }
+        });
 
         button_Submit = findViewById(R.id.button_submit);
         button_Submit.setOnClickListener(new View.OnClickListener() {
@@ -152,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         if (floatingWindowEnabled) {
-            startService(floatingWindowService);
+            floatingWindow.startService();
         }
     }
 
@@ -160,19 +179,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (floatingWindowEnabled) {
-            startService(floatingWindowService);
+            floatingWindow.startService();
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == FloatingWindowService.OVERLAY_PERMISSION_REQUEST_CODE) {
-            if (!FloatingWindowService.checkPermission(this)) {
+        if (requestCode == FloatingWindow.OVERLAY_PERMISSION_REQUEST_CODE) {
+            if (!floatingWindow.checkPermission()) {
                 Toast.makeText(this, "ACTION_MANAGE_OVERLAY_PERMISSION is necessary for floating window service", Toast.LENGTH_SHORT).show();
                 toggle_FloatingWindow.setChecked(false);
             } else {
-                startService(floatingWindowService);
+                floatingWindow.startService();
             }
         }
     }
