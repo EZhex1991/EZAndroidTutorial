@@ -22,11 +22,12 @@ import android.widget.Toast;
 public class FloatingWindowService extends Service {
     private static final String TAG = "FloatingWindowService";
 
-    private WindowManager m_WindowManager;
-    private WindowManager.LayoutParams m_FloatingWindowParams;
     private Intent m_ActivityIntent;
 
+    private WindowManager m_WindowManager;
+
     private LinearLayout m_FloatingWindow;
+    private WindowManager.LayoutParams m_FloatingWindowParams;
     private Button button;
 
     private int startX = 0, startY = 500;
@@ -51,9 +52,7 @@ public class FloatingWindowService extends Service {
             m_FloatingWindowParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY; // TYPE_PHONE is deprecated
         }
         // do not block touch event
-        m_FloatingWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        m_FloatingWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         m_FloatingWindowParams.format = PixelFormat.TRANSLUCENT; // set background to transparent
         // set window size to content size
         m_FloatingWindowParams.width = m_FloatingWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
