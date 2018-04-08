@@ -128,9 +128,9 @@ public class MainActivity extends AppCompatActivity {
                 }
                 preferenceEditor.putBoolean(PREFERENCE_KEY_FLOATING_WINDOW, floatingWindowEnabled).apply();
                 if (floatingWindowEnabled) {
-                    floatingWindow.startService();
+                    floatingWindow.bindService();
                 } else {
-                    floatingWindow.stopService();
+                    floatingWindow.unbindService();
                 }
             }
         });
@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         if (floatingWindowEnabled) {
-            floatingWindow.startService();
+            floatingWindow.bindService();
         }
     }
 
@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (floatingWindowEnabled) {
-            floatingWindow.startService();
+            floatingWindow.unbindService();
         }
     }
 
@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "ACTION_MANAGE_OVERLAY_PERMISSION is necessary for floating window service", Toast.LENGTH_SHORT).show();
                 toggle_FloatingWindow.setChecked(false);
             } else {
-                floatingWindow.startService();
+                floatingWindow.bindService();
             }
         }
     }

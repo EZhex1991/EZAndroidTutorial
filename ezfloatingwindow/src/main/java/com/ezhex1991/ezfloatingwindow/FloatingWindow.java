@@ -97,12 +97,14 @@ public class FloatingWindow {
     }
 
     public void setText(final String text) {
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                FloatingWindowService.setText(text);
-            }
-        });
+        if (floatingWindowService != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    floatingWindowService.setText(text);
+                }
+            });
+        }
     }
 
     public void setBackground(final byte[] imageBytes) {
@@ -110,12 +112,14 @@ public class FloatingWindow {
     }
 
     public void setBackground(final Drawable background) {
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                FloatingWindowService.setBackground(background);
-            }
-        });
+        if (floatingWindowService != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    floatingWindowService.setBackground(background);
+                }
+            });
+        }
     }
 
     public Bitmap bytesToBitmap(byte[] imageBytes) {

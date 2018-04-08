@@ -26,8 +26,8 @@ public class FloatingWindowService extends Service {
     private WindowManager.LayoutParams m_FloatingWindowParams;
     private Intent m_ActivityIntent;
 
-    private static LinearLayout m_FloatingWindow;
-    private static Button button;
+    private LinearLayout m_FloatingWindow;
+    private Button button;
 
     private int startX = 0, startY = 500;
 
@@ -166,12 +166,12 @@ public class FloatingWindowService extends Service {
         }
     }
 
-    public static void setText(String text) {
+    public void setText(String text) {
         if (button != null)
             button.setText(text);
     }
 
-    public static void setBackground(Drawable background) {
+    public void setBackground(Drawable background) {
         if (button != null)
             button.setBackground(background);
     }
