@@ -1,17 +1,10 @@
 package com.ezhex1991.ezlauncher;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.PixelFormat;
-import android.os.Build;
-import android.support.design.widget.CoordinatorLayout;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
@@ -36,9 +29,15 @@ public class Launcher {
                 activity.startActivity(intent);
             }
         });
-        navigatorParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        navigatorParams.bottomMargin = 0;
-        navigatorParams.gravity = Gravity.BOTTOM;
+        navigatorParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         activity.addContentView(navigator, navigatorParams);
+
+        navigator.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                activity.onTouchEvent(event);
+                return false;
+            }
+        });
     }
 }

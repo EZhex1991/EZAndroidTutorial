@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -18,7 +19,6 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.ezhex1991.ezfloatingwindow.FloatingWindow;
-import com.ezhex1991.ezfloatingwindow.FloatingWindowService;
 import com.ezhex1991.ezlauncher.Launcher;
 
 public class MainActivity extends AppCompatActivity {
@@ -169,6 +169,12 @@ public class MainActivity extends AppCompatActivity {
 
         Launcher launcher = new Launcher(this);
         launcher.showNavigator();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        floatingWindow.setText(String.format("%1d, %2d", (int) event.getRawX(), (int) event.getRawY()));
+        return super.onTouchEvent(event);
     }
 
     @Override
