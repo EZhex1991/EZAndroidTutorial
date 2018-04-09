@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
             rb.setOnClickListener(radiobuttonListener);
         }
 
-        floatingWindow = new FloatingWindow(this);
+        floatingWindow = new FloatingWindow(this, null);
         toggle_FloatingWindow = findViewById(R.id.toggle_floating_window);
         toggle_FloatingWindow.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override

@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.support.annotation.Nullable;
 
 import java.io.ByteArrayOutputStream;
 
@@ -41,23 +42,30 @@ public class FloatingWindow {
     }
 
     private Activity activity;
+    private IFloatingWindowListener listener;
     private Intent floatingWindowIntent;
     private FloatingWindowService floatingWindowService;
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             floatingWindowService = ((FloatingWindowService.Binder) service).getService();
+            floatingWindowService.listener = listener;
+            if (listener != null) {
+                listener.onConnected(floatingWindowService.getX(), floatingWindowService.getY());
+            }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            if (listener != null) listener.onDisconnected();
             floatingWindowService.stopSelf();
             floatingWindowService = null;
         }
     };
 
-    public FloatingWindow(Activity activity) {
+    public FloatingWindow(Activity activity, @Nullable IFloatingWindowListener listener) {
         this.activity = activity;
+        this.listener = listener;
         this.floatingWindowIntent = new Intent(activity, FloatingWindowService.class);
         floatingWindowIntent.putExtra("className", activity.getClass().getName());
     }

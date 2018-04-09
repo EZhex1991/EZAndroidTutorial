@@ -24,6 +24,8 @@ import android.widget.Toast;
 public class FloatingWindowService extends Service {
     private static final String TAG = "FloatingWindowService";
 
+    public IFloatingWindowListener listener;
+
     private Intent m_ActivityIntent;
 
     private WindowManager m_WindowManager;
@@ -138,6 +140,7 @@ public class FloatingWindowService extends Service {
                             m_FloatingWindowParams.y += deltaY;
                             m_WindowManager.updateViewLayout(m_FloatingWindow, m_FloatingWindowParams);
                             isMoved = true;
+                            if (listener != null) listener.onMove(getX(), getY());
                         }
                         currentX = eventX;
                         currentY = eventY;
@@ -146,6 +149,7 @@ public class FloatingWindowService extends Service {
                         if (!isMoved) {
                             ExpandWindow(500, 500);
                             popupWindow.showAsDropDown(v);
+                            if (listener != null) listener.onClick();
                             v.performClick();
                         }
                         break;
@@ -214,6 +218,14 @@ public class FloatingWindowService extends Service {
             }
             return true;
         }
+    }
+
+    public int getX() {
+        return m_FloatingWindowParams.x;
+    }
+
+    public int getY() {
+        return m_FloatingWindowParams.y;
     }
 
     public void setText(String text) {
