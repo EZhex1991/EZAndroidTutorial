@@ -12,11 +12,9 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.nfc.Tag;
 import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 
@@ -53,6 +51,7 @@ public class FloatingWindow {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            floatingWindowService.stopSelf();
             floatingWindowService = null;
         }
     };
