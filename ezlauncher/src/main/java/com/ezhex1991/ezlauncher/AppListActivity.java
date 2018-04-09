@@ -1,10 +1,10 @@
 package com.ezhex1991.ezlauncher;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
-    private static final String TAG = "MainActivity";
+public class AppListActivity extends Activity {
+    private static final String TAG = "AppListActivity";
 
     private GridView appListView;
     private List<ResolveInfo> resolveInfoList;
@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_app_list);
         loadApps();
         appListView = (GridView) findViewById(R.id.app_list);
 //        appListView.setAdapter(new SimpleAdapter(
@@ -102,11 +102,11 @@ public class MainActivity extends AppCompatActivity {
             TextView tv;
 
             if (view == null) {
-                ll = new LinearLayout(MainActivity.this);
+                ll = new LinearLayout(AppListActivity.this);
                 ll.setLayoutParams(itemViewParams);
-                iv = new ImageView(MainActivity.this);
+                iv = new ImageView(AppListActivity.this);
                 iv.setLayoutParams(iconViewParams);
-                tv = new TextView(MainActivity.this);
+                tv = new TextView(AppListActivity.this);
                 tv.setLayoutParams(nameViewParams);
                 ll.addView(iv);
                 ll.addView(tv);

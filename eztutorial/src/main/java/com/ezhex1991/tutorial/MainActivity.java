@@ -19,6 +19,7 @@ import android.widget.ToggleButton;
 
 import com.ezhex1991.ezfloatingwindow.FloatingWindow;
 import com.ezhex1991.ezfloatingwindow.FloatingWindowService;
+import com.ezhex1991.ezlauncher.Launcher;
 
 public class MainActivity extends AppCompatActivity {
     private static final String PREFERENCE_KEY_FLOATING_WINDOW = "floating_window_enabled";
@@ -165,6 +166,9 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        Launcher launcher = new Launcher(this);
+        launcher.showNavigator();
     }
 
     @Override
