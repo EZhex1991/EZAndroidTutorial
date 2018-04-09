@@ -19,24 +19,29 @@ public class Launcher {
     }
 
     public void showNavigator() {
-        LayoutInflater inflater = LayoutInflater.from(activity);
-        navigator = (LinearLayout) inflater.inflate(R.layout.layout_bottom_navigator, null);
-        button_AppList = navigator.findViewById(R.id.button_app_list);
-        button_AppList.setOnClickListener(new View.OnClickListener() {
+        activity.runOnUiThread(new Runnable() {
             @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(activity, AppListActivity.class);
-                activity.startActivity(intent);
-            }
-        });
-        navigatorParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-        activity.addContentView(navigator, navigatorParams);
+            public void run() {
+                LayoutInflater inflater = LayoutInflater.from(activity);
+                navigator = (LinearLayout) inflater.inflate(R.layout.layout_bottom_navigator, null);
+                button_AppList = navigator.findViewById(R.id.button_app_list);
+                button_AppList.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(activity, AppListActivity.class);
+                        activity.startActivity(intent);
+                    }
+                });
+                navigatorParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+                activity.addContentView(navigator, navigatorParams);
 
-        navigator.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                activity.onTouchEvent(event);
-                return false;
+                navigator.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        activity.onTouchEvent(event);
+                        return false;
+                    }
+                });
             }
         });
     }
