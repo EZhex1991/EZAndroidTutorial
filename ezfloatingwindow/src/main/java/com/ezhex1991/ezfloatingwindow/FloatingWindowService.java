@@ -11,12 +11,16 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
+import android.widget.PopupWindow;
 import android.widget.Toast;
 
 public class FloatingWindowService extends Service {
@@ -28,7 +32,11 @@ public class FloatingWindowService extends Service {
 
     private LinearLayout m_FloatingWindow;
     private WindowManager.LayoutParams m_FloatingWindowParams;
-    private Button button;
+    private Button m_FloatingButton;
+
+    private LinearLayout m_PopupWindow;
+    private Button m_PopupButton_1;
+    private Button m_PopupButton_2;
 
     private int startX = 0, startY = 500;
 
@@ -43,32 +51,70 @@ public class FloatingWindowService extends Service {
         super.onCreate();
         // get WindowManager to add floating window
         m_WindowManager = (WindowManager) getApplication().getSystemService(Context.WINDOW_SERVICE);
+        LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
 
-        // create layout params to show floating window
-        m_FloatingWindowParams = new WindowManager.LayoutParams(); // different to ViewGroup.LayoutParams
+        m_PopupWindow = (LinearLayout) inflater.inflate(R.layout.popup_window, null);
+        m_PopupButton_1 = m_PopupWindow.findViewById(R.id.popup_button_1);
+        m_PopupButton_2 = m_PopupWindow.findViewById(R.id.popup_button_2);
+        m_PopupButton_1.setText("Open");
+        m_PopupButton_2.setText("showToast");
+        View.OnTouchListener openApp = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                ShrinkWindow();
+                if (m_ActivityIntent != null) {
+                    startActivity(m_ActivityIntent);
+                    Toast.makeText(FloatingWindowService.this, "Jump to " + m_ActivityIntent.getComponent().getClassName(), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(FloatingWindowService.this, "Null", Toast.LENGTH_SHORT).show();
+                }
+                return false;
+            }
+        };
+        m_PopupButton_1.setOnTouchListener(openApp);
+        View.OnTouchListener showToast = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                ShrinkWindow();
+                Toast.makeText(FloatingWindowService.this, m_ActivityIntent.getComponent().getClassName(), Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        };
+        m_PopupButton_2.setOnTouchListener(showToast);
+
+        final PopupWindow popupWindow = new PopupWindow(m_PopupWindow,
+                WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT,
+                true);
+        popupWindow.setTouchable(true);
+        View.OnTouchListener popupWindowListener = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                ShrinkWindow();
+                return false;
+            }
+        };
+        popupWindow.setTouchInterceptor(popupWindowListener);
+
+        m_FloatingWindow = (LinearLayout) inflater.inflate(R.layout.floating_window, null);
+        // create layout params to show floating window, different to ViewGroup.LayoutParams
+        m_FloatingWindowParams = new WindowManager.LayoutParams();
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             m_FloatingWindowParams.type = WindowManager.LayoutParams.TYPE_PHONE;
         } else {
             m_FloatingWindowParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY; // TYPE_PHONE is deprecated
         }
-        // do not block touch event
-        m_FloatingWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        m_FloatingWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
         m_FloatingWindowParams.format = PixelFormat.TRANSLUCENT; // set background to transparent
-        // set window size to content size
-        m_FloatingWindowParams.width = m_FloatingWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        m_FloatingWindowParams.width = m_FloatingWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT; // set window size to content size
         // set start position
         m_FloatingWindowParams.x = startX;
         m_FloatingWindowParams.y = startY;
-
-        // load layout dynamically
-        LayoutInflater inflater = LayoutInflater.from(getApplication());
-        m_FloatingWindow = (LinearLayout) inflater.inflate(R.layout.floating_window, null);
-
-        // add view
+        m_FloatingWindowParams.gravity = Gravity.LEFT | Gravity.TOP;
         m_WindowManager.addView(m_FloatingWindow, m_FloatingWindowParams);
 
-        button = m_FloatingWindow.findViewById(R.id.button);
-        View.OnTouchListener buttonListener = new View.OnTouchListener() {
+        m_FloatingButton = m_FloatingWindow.findViewById(R.id.floating_button);
+        View.OnTouchListener floatingButtonListener = new View.OnTouchListener() {
             private int currentX, currentY;
             private int eventX, eventY;
             private int deltaX, deltaY;
@@ -100,12 +146,8 @@ public class FloatingWindowService extends Service {
                         break;
                     case MotionEvent.ACTION_UP:
                         if (!isMoved) {
-                            if (m_ActivityIntent != null) {
-                                startActivity(m_ActivityIntent);
-                                Toast.makeText(FloatingWindowService.this, "Jump to " + m_ActivityIntent.getComponent().getClassName(), Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(FloatingWindowService.this, "Null", Toast.LENGTH_SHORT).show();
-                            }
+                            ExpandWindow(500, 500);
+                            popupWindow.showAsDropDown(v);
                             v.performClick();
                         }
                         break;
@@ -113,7 +155,7 @@ public class FloatingWindowService extends Service {
                 return false;
             }
         };
-        button.setOnTouchListener(buttonListener);
+        m_FloatingButton.setOnTouchListener(floatingButtonListener);
     }
 
     @Override
@@ -133,6 +175,17 @@ public class FloatingWindowService extends Service {
         if (m_FloatingWindow != null)
             m_WindowManager.removeView(m_FloatingWindow);
         super.onDestroy();
+    }
+
+    private void ShrinkWindow() {
+        m_FloatingWindowParams.width = m_FloatingWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        m_WindowManager.updateViewLayout(m_FloatingWindow, m_FloatingWindowParams);
+    }
+
+    private void ExpandWindow(int x, int y) {
+        m_FloatingWindowParams.width = x;
+        m_FloatingWindowParams.height = y;
+        m_WindowManager.updateViewLayout(m_FloatingWindow, m_FloatingWindowParams);
     }
 
     public boolean getIntentData(Intent intent) {
@@ -166,12 +219,12 @@ public class FloatingWindowService extends Service {
     }
 
     public void setText(String text) {
-        if (button != null)
-            button.setText(text);
+        if (m_FloatingButton != null)
+            m_FloatingButton.setText(text);
     }
 
     public void setBackground(Drawable background) {
-        if (button != null)
-            button.setBackground(background);
+        if (m_FloatingButton != null)
+            m_FloatingButton.setBackground(background);
     }
 }
